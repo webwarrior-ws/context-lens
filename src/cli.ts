@@ -903,6 +903,23 @@ if (parsedArgs.commandName === "analyze") {
         }
       }
 
+      // Add providers based on *_API_KEY env. vars
+      const apiKeyVarNameSuffix = "_API_KEY";
+      const apiKeyEnvVars = Object.keys(process.env).filter((varName) =>
+        varName.endsWith(apiKeyVarNameSuffix),
+      );
+      apiKeyEnvVars.forEach((varName) => {
+        const providerName = varName
+          .replace(apiKeyVarNameSuffix, "")
+          .toLowerCase()
+          .replace("_", "-");
+        console.log(`Candidate provider: ${providerName}`);
+        if (!Object.hasOwn(providers, providerName)) {
+          providers[providerName] = { baseUrl: proxyBaseUrl };
+          console.log(`Provider added: ${providerName}`);
+        }
+      });
+
       // Rewrite every provider that has an external baseUrl, regardless of its
       // key name. For providers whose upstream isn't natively known to the proxy,
       // stash the real URL as x-target-url so the proxy forwards correctly.
